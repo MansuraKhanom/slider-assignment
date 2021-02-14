@@ -24,13 +24,16 @@ const showImages = (images) => {
   })
 
 }
-const getImages = (query) => {
-  fetch(`https://pixabay.com/api/?key=${KEY}&q=${query}&image_type=photo&pretty=true`)
-    .then(response => (response.json()))
-    //solving the search button problem
-    .then(data => showImages(data.hits))
-    .catch(err => console.log(err))
-
+async function getImages(query) {
+  try {
+    document.getElementById("spinner").style.display = 'block';
+    const res = await fetch(`https://pixabay.com/api/?key=${KEY}&q=${query}&image_type=photo&pretty=true`);
+    const data = await res.json();
+    showImages(data.hits);
+    document.getElementById("spinner").style.display = 'none';
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 let slideIndex = 0;
@@ -45,16 +48,10 @@ const selectItem = (event, img) => {
   else {
     //solustion for deselecting an image
     element.classList.toggle('added');
-    sliders.splice(item)
-
-    //solution for adding deselected image again
-    // delete:
-    let deleted = sliders.splice(item);
-    // restore:
-    sliders.splice(1, deleted);
+    sliders.splice(item, 1);
   }
 }
-var timer
+var timer;
 const createSlider = () => {
   // check slider image length
   if (sliders.length < 2) {
@@ -117,29 +114,24 @@ const changeSlide = (index) => {
   items[index].style.display = "block"
 }
 
-// worked on search field onpress
+// worked on "onpress" searching
 const searchInp = document.getElementById('search');
 searchInp.addEventListener("keypress", function (event) {
   if (event.key == "Enter") {
-    document.getElementById('search-btn').click();
-    document.querySelector('.main').style.display = 'none';
-    clearInterval(timer);
-    const search = document.getElementById('search');
-    getImages(search.value)
-    sliders.length = 0;
+    onClickSearch();
   }
 })
-searchBtn.addEventListener("click", function () {
+searchBtn.addEventListener("click", onClickSearch);
+
+async function onClickSearch() {
   document.querySelector('.main').style.display = 'none';
   clearInterval(timer);
   const search = document.getElementById('search');
-  getImages(search.value)
+  getImages(search.value);
   sliders.length = 0;
-  clear();
-})
 
-function clear() {
-  document.getElementById("search").value = ' '
+  // erasing innertext of input field after "onclick"/"onpress"
+  document.getElementById('search').value = "";
 }
 
 sliderBtn.addEventListener('click', function () {
