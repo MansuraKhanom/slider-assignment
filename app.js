@@ -1,16 +1,13 @@
 const imagesArea = document.querySelector('.images');
 const gallery = document.querySelector('.gallery');
 const galleryHeader = document.querySelector('.gallery-header');
-const searchBtn = document.getElementById('search-btn');
+const searchBtn = document.getElementById("search-btn");
 const sliderBtn = document.getElementById('create-slider');
 const sliderContainer = document.getElementById('sliders');
 // selected image 
 let sliders = [];
 
 
-// If this key doesn't work
-// Find the name in the url and go to their website
-// to create your own api key
 const KEY = '15674931-a9d714b6e9d654524df198e00&q';
 
 // show images 
@@ -27,10 +24,10 @@ const showImages = (images) => {
   })
 
 }
-
 const getImages = (query) => {
   fetch(`https://pixabay.com/api/?key=${KEY}&q=${query}&image_type=photo&pretty=true`)
-    .then(response => response.json())
+    .then(response => (response.json()))
+    //solving the search button problem
     .then(data => showImages(data.hits))
     .catch(err => console.log(err))
 
@@ -39,13 +36,22 @@ const getImages = (query) => {
 let slideIndex = 0;
 const selectItem = (event, img) => {
   let element = event.target;
-  element.classList.add('added');
 
   let item = sliders.indexOf(img);
   if (item === -1) {
+    element.classList.add('added');
     sliders.push(img);
-  } else {
-    alert('Hey, Already added !')
+  }
+  else {
+    //solustion for deselecting an image
+    element.classList.toggle('added');
+    sliders.splice(item)
+
+    //solution for adding deselected image again
+    // delete:
+    let deleted = sliders.splice(item);
+    // restore:
+    sliders.splice(1, deleted);
   }
 }
 var timer
@@ -84,6 +90,7 @@ const createSlider = () => {
   }, duration);
 }
 
+
 // change slider index 
 const changeItem = index => {
   changeSlide(slideIndex += index);
@@ -110,13 +117,30 @@ const changeSlide = (index) => {
   items[index].style.display = "block"
 }
 
-searchBtn.addEventListener('click', function () {
+// worked on search field onpress
+const searchInp = document.getElementById('search');
+searchInp.addEventListener("keypress", function (event) {
+  if (event.key == "Enter") {
+    document.getElementById('search-btn').click();
+    document.querySelector('.main').style.display = 'none';
+    clearInterval(timer);
+    const search = document.getElementById('search');
+    getImages(search.value)
+    sliders.length = 0;
+  }
+})
+searchBtn.addEventListener("click", function () {
   document.querySelector('.main').style.display = 'none';
   clearInterval(timer);
   const search = document.getElementById('search');
   getImages(search.value)
   sliders.length = 0;
+  clear();
 })
+
+function clear() {
+  document.getElementById("search").value = ' '
+}
 
 sliderBtn.addEventListener('click', function () {
   createSlider()
